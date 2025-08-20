@@ -1,1 +1,102 @@
-
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f4f4f4;
+}
+.container {
+    max-width: 1200px;
+    margin: auto;
+}
+.header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.toggle {
+    text-align: right;
+}
+.stats {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+.stat-card {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    width: 23%;
+    text-align: center;
+}
+.filters {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+.filters select {
+    padding: 10px;
+    width: 23%;
+    border-radius: 5px;
+}
+.proxy-table {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    padding: 20px;
+}
+.proxy-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.proxy-table th, .proxy-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+.proxy-table th {
+    background: #f9f9f9;
+}
+.actions {
+    display: flex;
+    gap: 10px;
+}
+.actions button {
+    padding: 5px 10px;
+    cursor: pointer;
+}
+.buttons {
+    text-align: right;
+    margin-bottom: 10px;
+}
+.buttons button {
+    padding: 10px 20px;
+    margin-left: 10px;
+}
+.footer {
+    text-align: center;
+    margin-top: 20px;
+    color: #666;
+}
+.pagination {
+    text-align: center;
+    margin-top: 10px;
+}
+.pagination button {
+    margin: 0 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+.dark-mode {
+    background-color: #333;
+    color: #fff;
+}
+.dark-mode .stat-card, .dark-mode .proxy-table {
+    background: #444;
+}
+.dark-mode .proxy-table th {
+    background: #555;
+}
+.dark-mode .pagination button {
+    background: #555;
+    color: #fff;
+}
