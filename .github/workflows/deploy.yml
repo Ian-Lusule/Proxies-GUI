@@ -18,8 +18,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          repository: Ian-Lusule/Proxies-GUI
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: true
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
