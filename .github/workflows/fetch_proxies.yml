@@ -5,19 +5,16 @@ on:
     - cron: '*/30 * * * *'
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 jobs:
   fetch-proxies:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.FETCH_PROXIES_TOKEN }}
-          persist-credentials: true
-          
+          persist-credentials: false   # Important: disable default token
+
       - name: Fetch tested_proxies.json from private repo
         run: |
           curl -H "Authorization: token ${{ secrets.FETCH_PROXIES_TOKEN }}" \
@@ -34,4 +31,4 @@ jobs:
           git remote set-url origin https://Ian-Lusule:${GH_TOKEN}@github.com/Ian-Lusule/Proxies-GUI.git
           git add assets/tested_proxies.json
           git commit -m "Update tested_proxies.json from private repo [auto]" || echo "No changes"
-          git push
+          git push origin main
