@@ -1,8 +1,8 @@
-name: Fetch and Overwrite Proxies
+name: Fetch and Update Proxies
 
 on:
   schedule:
-    - cron: '*/30 * * * *'  # Runs every 30 minutes
+    - cron: '*/30 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # ✅ Checkout public repository (full history)
+      # Checkout public repository
       - name: Checkout public repository
         uses: actions/checkout@v4
         with:
@@ -21,16 +21,9 @@ jobs:
           ref: main
           token: ${{ secrets.GITHUB_TOKEN }}
           persist-credentials: true
-          fetch-depth: 0
+          fetch-depth: 0  # ✅ full history so Git operations like merge/rebase are possible
 
-      # ✅ Configure Git
-      - name: Configure Git
-        run: |
-          git config user.name "Ian-Lusule"
-          git config user.email "amlusule@gmail.com"
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/Ian-Lusule/Proxies-GUI.git
-
-      # ✅ Fetch JSON from private repo and overwrite
+      # Fetch tested_proxies.json from private repo
       - name: Fetch tested_proxies.json from private repo
         run: |
           curl -H "Authorization: token ${{ secrets.FETCH_PROXIES_TOKEN }}" \
@@ -38,9 +31,21 @@ jobs:
           -L "https://api.github.com/repos/Ian-Lusule/Proxies-Scripts/contents/Proxies-GUI-Scripts/tested_proxies.json" \
           -o "assets/tested_proxies.json"
 
-      # ✅ Force commit and push
-      - name: Commit and force push updated JSON file
+      # Configure Git
+      - name: Configure Git
+        run: |
+          git config user.name "Ian-Lusule"
+          git config user.email "amlusule@gmail.com"
+
+      # Commit and push if there are changes
+      - name: Commit and push if changes
         run: |
           git add assets/tested_proxies.json
-          git commit -m "Overwrite tested_proxies.json from private repo [auto]"
-          git push origin main --force
+          if ! git diff --cached --quiet; then
+            git commit -m "Update tested_proxies.json from private repo [auto]"
+            git fetch origin main
+            git merge origin/main --strategy-option=ours --no-edit
+            git push
+          else
+            echo "No changes to commit"
+          fi
