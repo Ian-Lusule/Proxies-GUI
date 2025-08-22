@@ -1,8 +1,8 @@
-name: Fetch and Update Proxies
+name: Fetch and Overwrite Proxies
 
 on:
   schedule:
-    - cron: '*/30 * * * *'
+    - cron: '*/30 * * * *'  # Runs every 30 minutes
   workflow_dispatch:
 
 permissions:
@@ -28,15 +28,9 @@ jobs:
         run: |
           git config user.name "Ian-Lusule"
           git config user.email "amlusule@gmail.com"
-
-      # ✅ Pull latest changes BEFORE making any edits
-      - name: Sync with remote main
-        run: |
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/Ian-Lusule/Proxies-GUI.git
-          git fetch origin
-          git rebase origin/main
 
-      # ✅ Fetch JSON from private repo
+      # ✅ Fetch JSON from private repo and overwrite
       - name: Fetch tested_proxies.json from private repo
         run: |
           curl -H "Authorization: token ${{ secrets.FETCH_PROXIES_TOKEN }}" \
@@ -44,13 +38,9 @@ jobs:
           -L "https://api.github.com/repos/Ian-Lusule/Proxies-Scripts/contents/Proxies-GUI-Scripts/tested_proxies.json" \
           -o "assets/tested_proxies.json"
 
-      # ✅ Commit and push only if there are changes
-      - name: Commit and push if changes
+      # ✅ Force commit and push
+      - name: Commit and force push updated JSON file
         run: |
           git add assets/tested_proxies.json
-          if ! git diff --cached --quiet; then
-            git commit -m "Update tested_proxies.json from private repo [auto]"
-            git push origin main
-          else
-            echo "No changes to commit"
-          fi
+          git commit -m "Overwrite tested_proxies.json from private repo [auto]"
+          git push origin main --force
