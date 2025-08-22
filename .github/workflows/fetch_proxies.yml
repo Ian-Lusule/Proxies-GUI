@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout public repository
+      # Checkout public repo (full history)
       - name: Checkout public repository
         uses: actions/checkout@v4
         with:
@@ -21,9 +21,15 @@ jobs:
           ref: main
           token: ${{ secrets.GITHUB_TOKEN }}
           persist-credentials: true
-          fetch-depth: 0  # ✅ full history so Git operations like merge/rebase are possible
+          fetch-depth: 0
 
-      # Fetch tested_proxies.json from private repo
+      # Pull latest changes BEFORE making any edits
+      - name: Pull latest changes
+        run: |
+          git fetch origin
+          git rebase origin/main
+
+      # Fetch JSON from private repo
       - name: Fetch tested_proxies.json from private repo
         run: |
           curl -H "Authorization: token ${{ secrets.FETCH_PROXIES_TOKEN }}" \
@@ -37,15 +43,13 @@ jobs:
           git config user.name "Ian-Lusule"
           git config user.email "amlusule@gmail.com"
 
-      # Commit and push if there are changes
+      # Commit and push only if there are changes
       - name: Commit and push if changes
         run: |
           git add assets/tested_proxies.json
           if ! git diff --cached --quiet; then
             git commit -m "Update tested_proxies.json from private repo [auto]"
-            git fetch origin main
-            git merge origin/main --strategy-option=ours --no-edit
-            git push
+            git push origin main
           else
             echo "No changes to commit"
           fi
