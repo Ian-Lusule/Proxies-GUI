@@ -5,30 +5,34 @@ on:
     - cron: '*/30 * * * *'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   fetch-proxies:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          persist-credentials: false   # Important: disable default token
+          token: ${{ secrets.FETCH_PROXIES_TOKEN }}
+          persist-credentials: true
 
       - name: Fetch tested_proxies.json from private repo
+        env:
+          GH_TOKEN: ${{ secrets.FETCH_PROXIES_TOKEN }}
         run: |
-          curl -H "Authorization: token ${{ secrets.FETCH_PROXIES_TOKEN }}" \
+          curl -H "Authorization: token $GH_TOKEN" \
           -H "Accept: application/vnd.github.v3.raw" \
           -L "https://api.github.com/repos/Ian-Lusule/Proxies-Scripts/contents/Proxies-GUI-Scripts/tested_proxies.json" \
           -o "assets/tested_proxies.json"
 
-      - name: Configure Git and Push
+      - name: Commit and push updated JSON file
         env:
           GH_TOKEN: ${{ secrets.FETCH_PROXIES_TOKEN }}
         run: |
           git config --global user.name "Ian-Lusule"
           git config --global user.email "ianlusule@users.noreply.github.com"
-          git remote set-url origin https://Ian-Lusule:${GH_TOKEN}@github.com/Ian-Lusule/Proxies-GUI.git
           git add assets/tested_proxies.json
-          git commit -m "Update tested_proxies.json from private repo [auto]" || echo "No changes"
+          git commit -m "Update tested_proxies.json from private repo [auto]" || echo "No changes to commit"
           git push origin main
