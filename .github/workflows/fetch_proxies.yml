@@ -1,50 +1,50 @@
-name: Fetch and Overwrite tested_proxies.json
+name: Fetch and Update Proxies
 
 on:
   schedule:
-    - cron: '*/30 * * * *'
-  workflow_dispatch:
+    - cron: '*/30 * * * *' # Runs every 30 minutes
+  workflow_dispatch: # Allows manual trigger
 
 permissions:
   contents: write
 
 jobs:
-  fetch-and-overwrite:
+  fetch-proxies:
     runs-on: ubuntu-latest
 
     steps:
-      # ✅ Checkout the public repository
-      - name: Checkout public repository
+      # ✅ Checkout your repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
+
+      # ✅ Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          repository: Ian-Lusule/Proxies-GUI
-          ref: main
-          token: ${{ secrets.GITHUB_TOKEN }}
-          persist-credentials: true
+          python-version: '3.x'
 
-      # ✅ Download tested_proxies.json from private repo and overwrite
-      - name: Fetch tested_proxies.json from private repo
+      # ✅ Install dependencies
+      - name: Install dependencies
         run: |
-          echo "Fetching tested_proxies.json from private repo..."
-          curl -H "Authorization: token ${{ secrets.FETCH_PROXIES_TOKEN }}" \
-               -H "Accept: application/vnd.github.v3.raw" \
-               -L "https://api.github.com/repos/Ian-Lusule/Proxies-Scripts/contents/Proxies-GUI-Scripts/tested_proxies.json" \
-               -o "assets/tested_proxies.json"
-          echo "File successfully fetched and overwritten."
+          python -m pip install --upgrade pip
+          pip install requests
 
-      # ✅ Configure Git
-      - name: Configure Git
+      # ✅ Run the Python script
+      - name: Fetch tested_proxies.json
+        env:
+          FETCH_PROXIES_TOKEN: ${{ secrets.FETCH_PROXIES_TOKEN }}
+        run: |
+          python scripts/fetch_proxies.py
+
+      # ✅ Commit and push changes if any
+      - name: Commit and Push Changes
         run: |
           git config user.name "Ian-Lusule"
           git config user.email "amlusule@gmail.com"
-
-      # ✅ Force add and commit changes (even if file is overwritten)
-      - name: Commit and push changes
-        run: |
           git add assets/tested_proxies.json
-          if git commit -m "Force update tested_proxies.json [auto]"; then
-            echo "File committed. Pushing to main branch..."
-            git push origin main
+          if ! git diff --cached --quiet; then
+            git commit -m "Update tested_proxies.json from private repo [auto]"
+            git push
           else
-            echo "No changes detected, nothing to commit."
+            echo "No changes to commit"
           fi
