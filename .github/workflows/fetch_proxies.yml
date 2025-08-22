@@ -5,15 +5,24 @@ on:
     - cron: '*/30 * * * *'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   fetch-proxies:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repository
+      # Checkout public repo (Proxies-GUI)
+      - name: Checkout public repository
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.FETCH_PROXIES_TOKEN }}
+          repository: Ian-Lusule/Proxies-GUI
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: true
 
+      # Fetch JSON from private repo
       - name: Fetch tested_proxies.json from private repo
         run: |
           curl -H "Authorization: token ${{ secrets.FETCH_PROXIES_TOKEN }}" \
@@ -21,12 +30,19 @@ jobs:
           -L "https://api.github.com/repos/Ian-Lusule/Proxies-Scripts/contents/Proxies-GUI-Scripts/tested_proxies.json" \
           -o "assets/tested_proxies.json"
 
-      - name: Commit and push
+      # Configure Git
+      - name: Configure Git
         run: |
           git config user.name "Ian-Lusule"
-          git config user.email "ianlusule@users.noreply.github.com"
+          git config user.email "amlusule@gmail.com"
+
+      # Commit and push only if there are changes
+      - name: Commit and push if changes
+        run: |
           git add assets/tested_proxies.json
-          git commit -m "Update tested_proxies.json [auto]"
-          git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.FETCH_PROXIES_TOKEN }}
+          if ! git diff --cached --quiet; then
+            git commit -m "Update tested_proxies.json from private repo [auto]"
+            git push
+          else
+            echo "No changes to commit"
+          fi
