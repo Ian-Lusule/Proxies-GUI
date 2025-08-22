@@ -1,1 +1,141 @@
 
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f4f7f6;
+    color: #333;
+    line-height: 1.6;
+    margin: 0;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 20px;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 20px;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-group label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+select {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+}
+
+.proxy-table-container {
+    overflow-x: auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.proxy-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.proxy-table th, .proxy-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.proxy-table th {
+    background-color: #eef1f3;
+    cursor: pointer;
+    user-select: none;
+    font-weight: 700;
+    position: relative;
+}
+
+.proxy-table th.sort-asc::after,
+.proxy-table th.sort-desc::after {
+    content: '';
+    display: inline-block;
+    width: 0;
+    height: 0;
+    margin-left: 5px;
+    vertical-align: middle;
+}
+
+.proxy-table th.sort-asc::after {
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #333;
+}
+
+.proxy-table th.sort-desc::after {
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 5px solid #333;
+}
+
+.status-cell {
+    display: flex;
+    align-items: center;
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.status-active {
+    background-color: #4CAF50;
+}
+
+.status-inactive {
+    background-color: #f44336;
+}
+
+.last-updated {
+    text-align: center;
+    color: #666;
+    margin-top: 20px;
+    font-size: 0.9em;
+}
+
+.copy-btn {
+    padding: 5px 10px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.copy-btn:hover {
+    background-color: #0056b3;
+}
