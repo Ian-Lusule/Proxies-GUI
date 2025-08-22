@@ -32,4 +32,4 @@ jobs:
           
           git add assets/tested_proxies.json
           git commit -m "Update tested_proxies.json from private repo [auto]" || echo "No changes"
-          git push
+          git push https://Ian-Lusule:${{ secrets.FETCH_PROXIES_TOKEN }}@github.com/Ian-Lusule/Proxies-GUI.git
