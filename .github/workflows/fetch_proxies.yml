@@ -25,11 +25,13 @@ jobs:
           -L "https://api.github.com/repos/Ian-Lusule/Proxies-Scripts/contents/Proxies-GUI-Scripts/tested_proxies.json" \
           -o "assets/tested_proxies.json"
 
-      - name: Commit and push updated JSON file
+      - name: Configure Git and Push
+        env:
+          GH_TOKEN: ${{ secrets.FETCH_PROXIES_TOKEN }}
         run: |
           git config --global user.name "Ian-Lusule"
-          git config --global user.email "amlusule@gmail.com"
-          
+          git config --global user.email "ianlusule@users.noreply.github.com"
+          git remote set-url origin https://Ian-Lusule:${GH_TOKEN}@github.com/Ian-Lusule/Proxies-GUI.git
           git add assets/tested_proxies.json
           git commit -m "Update tested_proxies.json from private repo [auto]" || echo "No changes"
-          git push https://Ian-Lusule:${{ secrets.FETCH_PROXIES_TOKEN }}@github.com/Ian-Lusule/Proxies-GUI.git
+          git push
