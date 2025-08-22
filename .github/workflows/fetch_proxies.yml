@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout public repo (Proxies-GUI)
+      # Checkout public repo (full history)
       - name: Checkout public repository
         uses: actions/checkout@v4
         with:
@@ -21,6 +21,7 @@ jobs:
           ref: main
           token: ${{ secrets.GITHUB_TOKEN }}
           persist-credentials: true
+          fetch-depth: 0  # ✅ Important: fetch full history for rebase
 
       # Fetch JSON from private repo
       - name: Fetch tested_proxies.json from private repo
@@ -42,7 +43,7 @@ jobs:
           git add assets/tested_proxies.json
           if ! git diff --cached --quiet; then
             git commit -m "Update tested_proxies.json from private repo [auto]"
-            git pull --rebase  # ✅ Fix: Pull latest changes before pushing
+            git pull --rebase --autostash  # ✅ Pull latest changes safely
             git push
           else
             echo "No changes to commit"
