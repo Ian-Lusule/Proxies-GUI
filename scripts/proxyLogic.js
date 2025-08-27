@@ -4,6 +4,7 @@ const pageSize = 15;
 
 async function fetchProxies() {
     try {
+        // Correct path to the tested_proxies.json file
         const res = await fetch('assets/tested_proxies.json');
         if (!res.ok) throw new Error('Failed to fetch tested_proxies.json');
         const proxies = await res.json();
@@ -145,7 +146,7 @@ function exportProxies() {
 
 document.addEventListener('DOMContentLoaded', () => {
     fetchAndRenderProxies();
-    setInterval(fetchAndRenderProxies, 30 * 60 * 1000);
+    setInterval(fetchAndRenderProxies, 30 * 60 * 1000); // Refresh every 30 minutes
     document.getElementById('refreshBtn').addEventListener('click', fetchAndRenderProxies);
     document.getElementById('exportBtn').addEventListener('click', exportProxies);
     document.getElementById('protocolFilter').addEventListener('change', renderTable);
@@ -156,3 +157,4 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.classList.toggle('dark-mode');
     });
 });
+ 
