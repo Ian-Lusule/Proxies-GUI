@@ -113,6 +113,13 @@ select, input[type="text"] {
   border-bottom: 6px solid #333;
 }
 
+.proxy-table td:first-child,
+.proxy-table th:first-child {
+  width: 50px;
+  text-align: center;
+  font-weight: bold;
+}
+
 .status-cell {
   display: flex;
   align-items: center;
@@ -207,4 +214,3 @@ body.dark-mode input[type="text"] {
 body.dark-mode .pagination .page-indicator {
   background: #1f2937;
 }
- 
