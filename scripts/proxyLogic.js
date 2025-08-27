@@ -1,152 +1,158 @@
+let validatedProxies = [];
+let currentPage = 1;
+const pageSize = 15;
 
-document.addEventListener('DOMContentLoaded', () => {
-    const PROXIES_URL = './assets/tested_proxies.json';
-    const proxyList = document.getElementById('proxy-list');
+async function fetchProxies() {
+    try {
+        const res = await fetch('assets/tested_proxies.json');
+        if (!res.ok) throw new Error('Failed to fetch tested_proxies.json');
+        const proxies = await res.json();
+        return proxies;
+    } catch (e) {
+        console.error(`Failed to fetch proxies: ${e}`);
+        return [];
+    }
+}
+
+async function fetchAndRenderProxies() {
+    const tableBody = document.getElementById('proxyTableBody');
+    tableBody.innerHTML = '<tr><td colspan="5">Loading proxies...</td></tr>';
+
+    const proxies = await fetchProxies();
+    validatedProxies = proxies;
+
     const countryFilter = document.getElementById('countryFilter');
-    const protocolFilter = document.getElementById('protocolFilter');
-    const speedFilter = document.getElementById('speedFilter');
-    const tableHeaders = document.querySelectorAll('.proxy-table th[data-sort]');
-    const lastUpdatedElement = document.getElementById('last-updated');
+    countryFilter.innerHTML = '<option>All Countries</option>';
 
-    let allProxies = [];
-    let filteredProxies = [];
-
-    // Fetches the JSON file and initializes the UI
-    const fetchProxies = async () => {
-        try {
-            const response = await fetch(PROXIES_URL);
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            const data = await response.json();
-            allProxies = data;
-            
-            // Populate country filter and set up initial state
-            populateFilters();
-            filterAndRenderProxies();
-
-            // Set last updated time
-            const now = new Date();
-            lastUpdatedElement.textContent = `Last updated: ${now.toLocaleDateString()} at ${now.toLocaleTimeString()}`;
-
-        } catch (error) {
-            proxyList.innerHTML = `<tr><td colspan="6" class="error-message">Failed to load proxies. Please try again later.</td></tr>`;
-            console.error('Error fetching the proxy list:', error);
-        }
-    };
-
-    // Populates the country filter dropdown with unique countries
-    const populateFilters = () => {
-        const countries = [...new Set(allProxies.map(p => p.country))].sort();
-        countries.forEach(country => {
+    const uniqueCountries = [...new Set(proxies.map(p => p.country))].sort();
+    uniqueCountries.forEach(country => {
+        if (country) {
             const option = document.createElement('option');
             option.value = country;
             option.textContent = country;
             countryFilter.appendChild(option);
-        });
-    };
-
-    // Renders the proxies into the HTML table
-    const renderProxies = (proxiesToRender) => {
-        proxyList.innerHTML = '';
-        if (proxiesToRender.length === 0) {
-            proxyList.innerHTML = `<tr><td colspan="6" class="no-results-message">No proxies found matching your criteria.</td></tr>`;
-            return;
-        }
-
-        proxiesToRender.forEach(proxy => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${proxy.ip}</td>
-                <td>${proxy.protocol}</td>
-                <td>${proxy.country}</td>
-                <td>${proxy.latency_ms} ms</td>
-                <td class="status-cell">
-                    <span class="status-dot status-${proxy.status.toLowerCase()}"></span>
-                    ${proxy.status}
-                </td>
-                <td>
-                    <button class="copy-btn" data-ip="${proxy.ip}" data-protocol="${proxy.protocol}">Copy</button>
-                </td>
-            `;
-            proxyList.appendChild(row);
-        });
-    };
-
-    // Handles filtering and re-rendering of the proxy list
-    const filterAndRenderProxies = () => {
-        const country = countryFilter.value;
-        const protocol = protocolFilter.value;
-        const speed = speedFilter.value;
-
-        filteredProxies = allProxies.filter(proxy => {
-            const countryMatch = !country || proxy.country === country;
-            const protocolMatch = !protocol || proxy.protocol === protocol;
-            const speedMatch = !speed || proxy.speed_category === speed;
-            return proxy.status === "Active" && countryMatch && protocolMatch && speedMatch;
-        });
-        
-        // Sort after filtering
-        sortProxies();
-    };
-
-    // Handles sorting of the proxy list
-    const sortProxies = (sortKey = 'latency_ms', sortDirection = 'asc') => {
-        filteredProxies.sort((a, b) => {
-            let valA = a[sortKey];
-            let valB = b[sortKey];
-
-            if (typeof valA === 'string') {
-                valA = valA.toLowerCase();
-                valB = valB.toLowerCase();
-            }
-
-            if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
-            if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
-            return 0;
-        });
-
-        renderProxies(filteredProxies);
-    };
-
-    // Event listeners
-    countryFilter.addEventListener('change', filterAndRenderProxies);
-    protocolFilter.addEventListener('change', filterAndRenderProxies);
-    speedFilter.addEventListener('change', filterAndRenderProxies);
-
-    tableHeaders.forEach(header => {
-        header.addEventListener('click', () => {
-            const sortKey = header.getAttribute('data-sort');
-            const sortDirection = header.classList.contains('sort-asc') ? 'desc' : 'asc';
-            
-            // Reset all header classes
-            tableHeaders.forEach(h => h.classList.remove('sort-asc', 'sort-desc'));
-            
-            // Add class to current header
-            header.classList.add(`sort-${sortDirection}`);
-            sortProxies(sortKey, sortDirection);
-        });
-    });
-
-    // Handle "Copy" button clicks
-    proxyList.addEventListener('click', (e) => {
-        if (e.target.classList.contains('copy-btn')) {
-            const ip = e.target.getAttribute('data-ip');
-            const protocol = e.target.getAttribute('data-protocol');
-            const proxyString = `${protocol.toLowerCase()}://${ip}`;
-            navigator.clipboard.writeText(proxyString)
-                .then(() => {
-                    e.target.textContent = 'Copied!';
-                    setTimeout(() => {
-                        e.target.textContent = 'Copy';
-                    }, 2000);
-                })
-                .catch(err => {
-                    console.error('Failed to copy text:', err);
-                });
         }
     });
 
-    // Initial fetch of proxies
-    fetchProxies();
+    renderTable();
+    updateStats(validatedProxies);
+}
+
+function getFilteredProxies() {
+    const protocol = document.getElementById('protocolFilter').value;
+    const country = document.getElementById('countryFilter').value;
+    const speed = document.getElementById('speedFilter').value;
+    const status = document.getElementById('statusFilter').value;
+
+    return validatedProxies.filter(p => {
+        const matchesProtocol = protocol === 'All Protocols' || p.protocol === protocol;
+        const matchesCountry = country === 'All Countries' || p.country === country;
+        const matchesSpeed = speed === 'All Speeds' || p.speed_category === speed;
+        const matchesStatus = status === 'All Status' ||
+                              (status === 'Active Only' && p.status === 'Active') ||
+                              (status === 'Inactive Only' && p.status === 'Inactive');
+        return matchesProtocol && matchesCountry && matchesSpeed && matchesStatus;
+    });
+}
+
+function renderTable() {
+    const tableBody = document.getElementById('proxyTableBody');
+    tableBody.innerHTML = '';
+
+    const filtered = getFilteredProxies();
+    const start = (currentPage - 1) * pageSize;
+    const end = start + pageSize;
+    const pageProxies = filtered.slice(start, end);
+
+    pageProxies.forEach(proxy => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${proxy.ip}</td>
+            <td>${proxy.country}</td>
+            <td>${proxy.latency_ms} ms</td>
+            <td>${proxy.protocol}</td>
+            <td class="actions">
+                <button onclick="testProxy('${proxy.ip}')">Test</button>
+                <button onclick="removeProxy('${proxy.ip}')">Remove</button>
+            </td>
+        `;
+        row.dataset.status = proxy.status;
+        row.dataset.speed = proxy.speed_category;
+        row.dataset.protocol = proxy.protocol;
+        row.dataset.country = proxy.country;
+        tableBody.appendChild(row);
+    });
+
+    if (pageProxies.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="5">No proxies found</td></tr>';
+    }
+
+    renderPagination(filtered.length);
+}
+
+function renderPagination(total) {
+    const pageCount = Math.ceil(total / pageSize);
+    const pagination = document.getElementById('pagination');
+    pagination.innerHTML = '';
+    for (let i = 1; i <= pageCount; i++) {
+        const btn = document.createElement('button');
+        btn.innerText = i;
+        btn.onclick = () => {
+            currentPage = i;
+            renderTable();
+        };
+        if (i === currentPage) btn.disabled = true;
+        pagination.appendChild(btn);
+    }
+}
+
+function updateStats(proxies) {
+    const totalProxiesEl = document.getElementById('totalProxies');
+    const activeProxiesEl = document.getElementById('activeProxies');
+    const avgLatencyEl = document.getElementById('avgLatency');
+    const successRateEl = document.getElementById('successRate');
+
+    const total = proxies.length;
+    const active = proxies.filter(p => p.status === 'Active').length;
+    const avgLatency = active ? (proxies.filter(p => p.status === 'Active').reduce((sum, p) => sum + p.latency_ms, 0) / active).toFixed(2) : 0;
+    const successRate = total ? ((active / total) * 100).toFixed(2) : 0;
+
+    totalProxiesEl.textContent = total;
+    activeProxiesEl.textContent = active;
+    avgLatencyEl.textContent = `${avgLatency} ms`;
+    successRateEl.textContent = `${successRate}%`;
+}
+
+function testProxy(ip) {
+    alert(`Testing proxy: ${ip}`);
+}
+
+function removeProxy(ip) {
+    validatedProxies = validatedProxies.filter(p => p.ip !== ip);
+    renderTable();
+    updateStats(validatedProxies);
+}
+
+function exportProxies() {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(validatedProxies, null, 2));
+    const link = document.createElement('a');
+    link.setAttribute('href', dataStr);
+    link.setAttribute('download', 'proxies.json');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    fetchAndRenderProxies();
+    setInterval(fetchAndRenderProxies, 30 * 60 * 1000);
+    document.getElementById('refreshBtn').addEventListener('click', fetchAndRenderProxies);
+    document.getElementById('exportBtn').addEventListener('click', exportProxies);
+    document.getElementById('protocolFilter').addEventListener('change', renderTable);
+    document.getElementById('countryFilter').addEventListener('change', renderTable);
+    document.getElementById('speedFilter').addEventListener('change', renderTable);
+    document.getElementById('statusFilter').addEventListener('change', renderTable);
+    document.getElementById('darkModeToggle').addEventListener('change', () => {
+        document.body.classList.toggle('dark-mode');
+    });
 });
