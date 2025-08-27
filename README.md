@@ -101,7 +101,7 @@ The JSON file should contain an **array of proxy objects**:
 ---
 
 ## ✅ Live Demo
-👉 View on GitHub Pages: `https://YOUR-USERNAME.github.io/Proxies-GUI/`
+👉 View on GitHub Pages: `https://Ian-Lusule.github.io/Proxies-GUI/`
 
 ---
 
