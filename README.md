@@ -1,4 +1,3 @@
-
 # 🌐 Proxies GUI
 
 An **interactive proxy list interface** built with **HTML, CSS, and JavaScript**. It dynamically loads a JSON file of tested proxies and provides:
@@ -126,4 +125,4 @@ Contributions are welcome! Fork this repo, make changes, and submit a pull reque
 ---
 
 ## 📜 License
-MIT License © Ian-Lusule
+[MIT License © Ian-Lusule](LICENSE)
