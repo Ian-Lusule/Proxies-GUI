@@ -4,7 +4,6 @@ const pageSize = 15;
 
 async function fetchProxies() {
     try {
-        // Correct path to the tested_proxies.json file
         const res = await fetch('assets/tested_proxies.json');
         if (!res.ok) throw new Error('Failed to fetch tested_proxies.json');
         const proxies = await res.json();
@@ -157,4 +156,3 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.classList.toggle('dark-mode');
     });
 });
- 
