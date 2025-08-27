@@ -3,70 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Proxy List</title>
-    <link rel="stylesheet" href="./styles/styles.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <title>Advanced Proxy Dashboard</title>
+    <link rel="stylesheet" href="styles/styles.css">
 </head>
 <body>
-
-    <header>
-        <h1>Public Proxy List</h1>
-        <p>An interactive, automatically updated list of active proxies.</p>
-    </header>
-
-    <main class="container">
-        <section class="controls">
-            <div class="filter-group">
-                <label for="countryFilter">Country:</label>
-                <select id="countryFilter">
-                    <option value="">All Countries</option>
-                </select>
+    <div class="container">
+        <div class="header">
+            <h1>Advanced Proxy Dashboard</h1>
+            <div class="toggle">
+                <input type="checkbox" id="darkModeToggle">
+                <label for="darkModeToggle">Dark Mode</label>
             </div>
-            <div class="filter-group">
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <h3>Total Proxies</h3>
+                <p id="totalProxies">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Active Proxies</h3>
+                <p id="activeProxies">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Avg. Latency</h3>
+                <p id="avgLatency">0 ms</p>
+            </div>
+            <div class="stat-card">
+                <h3>Success Rate</h3>
+                <p id="successRate">0%</p>
+            </div>
+        </div>
+
+        <div class="filters">
+            <div>
                 <label for="protocolFilter">Protocol:</label>
                 <select id="protocolFilter">
-                    <option value="">All Protocols</option>
-                    <option value="HTTP">HTTP</option>
-                    <option value="HTTPS">HTTPS</option>
-                    <option value="SOCKS4">SOCKS4</option>
-                    <option value="SOCKS5">SOCKS5</option>
-                    <option value="CONNECT">CONNECT</option>
+                    <option>All Protocols</option>
+                    <option>HTTP</option>
+                    <option>HTTPS</option>
+                    <option>SOCKS4</option>
+                    <option>SOCKS5</option>
+                    <option>CONNECT</option>
                 </select>
             </div>
-            <div class="filter-group">
+            <div>
+                <label for="countryFilter">Country:</label>
+                <select id="countryFilter">
+                    <option>All Countries</option>
+                </select>
+            </div>
+            <div>
                 <label for="speedFilter">Speed:</label>
                 <select id="speedFilter">
-                    <option value="">All Speeds</option>
-                    <option value="Excellent (0-100ms)">Excellent (0-100ms)</option>
-                    <option value="Good (100-200ms)">Good (100-200ms)</option>
-                    <option value="Medium (200-500ms)">Medium (200-500ms)</option>
-                    <option value="Poor (500ms+)">Poor (500ms+)</option>
+                    <option>All Speeds</option>
+                    <option>Excellent (0-100ms)</option>
+                    <option>Good (100-200ms)</option>
+                    <option>Medium (200-500ms)</option>
+                    <option>Poor (500ms+)</option>
                 </select>
             </div>
-        </section>
-        
-        <section class="proxy-table-container">
-            <table class="proxy-table">
+            <div>
+                <label for="statusFilter">Status:</label>
+                <select id="statusFilter">
+                    <option>All Status</option>
+                    <option>Active Only</option>
+                    <option>Inactive Only</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="proxy-table">
+            <div class="buttons">
+                <button id="refreshBtn">Refresh</button>
+                <button id="exportBtn">Export</button>
+            </div>
+            <table>
                 <thead>
                     <tr>
-                        <th data-sort="ip">IP:Port</th>
-                        <th data-sort="protocol">Protocol</th>
-                        <th data-sort="country">Country</th>
-                        <th data-sort="latency_ms" class="sort-asc">Latency (ms)</th>
-                        <th>Status</th>
-                        <th>Download</th>
+                        <th>IP:Port</th>
+                        <th>Country</th>
+                        <th>Latency</th>
+                        <th>Protocol</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody id="proxy-list">
-                    <tr><td colspan="6" class="loading-message">Loading proxies...</td></tr>
+                <tbody id="proxyTableBody">
+                    <tr><td colspan="5">Loading proxies...</td></tr>
                 </tbody>
             </table>
-        </section>
-        <p class="last-updated" id="last-updated"></p>
-    </main>
+            <div class="pagination" id="pagination"></div>
+        </div>
 
-    <script src="./scripts/proxyLogic.js"></script>
+        <div class="footer">
+            <p>Advanced Proxy Dashboard © 2023 | Proxy data from hideip.me</p>
+        </div>
+    </div>
+    <script src="scripts/proxyLogic.js"></script>
 </body>
 </html>
+ 
