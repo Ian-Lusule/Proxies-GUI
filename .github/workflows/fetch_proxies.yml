@@ -13,28 +13,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # ✅ Checkout your repository
+      # ✅ Manual checkout instead of actions/checkout
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        run: |
+          git init .
+          git remote add origin https://github.com/${{ github.repository }}.git
+          git fetch origin ${{ github.ref }}
+          git checkout ${{ github.ref }}
 
-      # ✅ Set up Python
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
-
-      # ✅ Install dependencies
+      # ✅ Use system Python (already preinstalled)
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install requests
+          python3 -m pip install --upgrade pip
+          pip3 install requests
 
       # ✅ Run the Python script
       - name: Fetch tested_proxies.json
         env:
           FETCH_PROXIES_TOKEN: ${{ secrets.FETCH_PROXIES_TOKEN }}
         run: |
-          python scripts/fetch_proxies.py
+          python3 scripts/fetch_proxies.py
 
       # ✅ Commit and push changes if any
       - name: Commit and Push Changes
@@ -44,7 +42,7 @@ jobs:
           git add assets/tested_proxies.json
           if ! git diff --cached --quiet; then
             git commit -m "Update tested_proxies.json from private repo [auto]"
-            git push
+            git push https://Ian-Lusule:${{ secrets.FETCH_PROXIES_TOKEN }}@github.com/${{ github.repository }}.git HEAD:${{ github.ref }}
           else
             echo "No changes to commit"
           fi
