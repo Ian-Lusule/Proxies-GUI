@@ -13,19 +13,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # ✅ Use your vendored checkout
+      # ✅ Checkout without external actions
       - name: Checkout Repository
-        uses: ./.github/actions/checkout
+        run: |
+          git init .
+          git remote add origin https://github.com/${{ github.repository }}.git
+          git fetch origin ${{ github.ref_name }}
+          git checkout ${{ github.ref_name }}
 
-      # ✅ Use your vendored Python setup
-      - name: Set up Python
-        uses: ./.github/actions/setup-python
-        with:
-          python-version: '3.10'
-
-      # ✅ Install dependencies
+      # ✅ Install Python deps
       - name: Install dependencies
         run: |
+          python3 -m pip install --upgrade pip
           pip3 install requests
 
       # ✅ Run your script
