@@ -2,8 +2,8 @@ name: Fetch and Update Proxies
 
 on:
   schedule:
-    - cron: '*/30 * * * *'
-  workflow_dispatch:
+    - cron: '*/30 * * * *' # Runs every 30 minutes
+  workflow_dispatch: # Allows manual trigger
 
 permissions:
   contents: write
@@ -13,28 +13,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # ✅ Checkout without external actions
+      # ✅ Checkout your repository
       - name: Checkout Repository
-        run: |
-          git init .
-          git remote add origin https://github.com/${{ github.repository }}.git
-          git fetch origin ${{ github.ref_name }}
-          git checkout ${{ github.ref_name }}
+        uses: actions/checkout@v4
 
-      # ✅ Install Python deps
+      # ✅ Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      # ✅ Install dependencies
       - name: Install dependencies
         run: |
-          python3 -m pip install --upgrade pip
-          pip3 install requests
-
-      # ✅ Run your script
+          python -m pip install --upgrade pip
+          pip install requests
+      # ✅ Run the Python script
       - name: Fetch tested_proxies.json
         env:
           FETCH_PROXIES_TOKEN: ${{ secrets.FETCH_PROXIES_TOKEN }}
         run: |
-          python3 scripts/fetch_proxies.py
-
-      # ✅ Commit and push changes
+          python scripts/fetch_proxies.py
+      # ✅ Commit and push changes if any
       - name: Commit and Push Changes
         run: |
           git config user.name "Ian-Lusule"
@@ -42,7 +42,7 @@ jobs:
           git add assets/tested_proxies.json
           if ! git diff --cached --quiet; then
             git commit -m "Update tested_proxies.json from private repo [auto]"
-            git push https://Ian-Lusule:${{ secrets.FETCH_PROXIES_TOKEN }}@github.com/${{ github.repository }}.git HEAD:${{ github.ref_name }}
+            git push
           else
             echo "No changes to commit"
           fi
