@@ -1,13 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
   const PROXIES_URL = './assets/tested_proxies.json';
   const PAGE_SIZE = 20;
-  const REFRESH_MS = 150_000;
+  const REFRESH_MS = 30_000;
 
   const proxyList = document.getElementById('proxy-list');
   const countryFilter = document.getElementById('countryFilter');
   const protocolFilter = document.getElementById('protocolFilter');
   const speedFilter = document.getElementById('speedFilter');
   const searchIP = document.getElementById('searchIP');
+  const showInactive = document.getElementById('showInactive');
+  const downloadTxtBtn = document.getElementById('downloadTxt');
+  const downloadCsvBtn = document.getElementById('downloadCsv');
+
   const tableHeaders = document.querySelectorAll('.proxy-table th[data-sort]');
   const lastUpdatedElement = document.getElementById('last-updated');
   const spinner = document.getElementById('loadingSpinner');
@@ -98,26 +102,33 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const populateCountries = () => {
+    const selected = countryFilter.value; 
     const countries = [...new Set(allProxies.map(p => p.country).filter(Boolean))].sort();
     countryFilter.querySelectorAll('option:not([value=""])').forEach(o => o.remove());
     countries.forEach(country => {
       const opt = document.createElement('option');
       opt.value = country;
       opt.textContent = country;
+      if (country === selected) opt.selected = true;
       countryFilter.appendChild(opt);
     });
   };
 
   const filterProxies = (resetPage = true) => {
-    const q = searchIP.value.trim().toLowerCase();
-    const country = countryFilter.value, protocol = protocolFilter.value, speed = speedFilter.value;
+    const q = (searchIP.value || "").trim().toLowerCase();
+    const country = countryFilter.value;
+    const protocol = protocolFilter.value;
+    const speed = speedFilter.value;
+    const includeInactive = showInactive.checked;
 
     filteredProxies = allProxies.filter(proxy => {
-      if ((proxy.status || '').toLowerCase() !== 'active') return false;
-      const ipMatch = !q || (proxy.ip || '').toLowerCase().includes(q);
+      if (!includeInactive && (proxy.status || "").toLowerCase() !== "active") return false;
+
+      const ipMatch = !q || (proxy.ip || "").toLowerCase().includes(q);
       const countryMatch = !country || proxy.country === country;
       const protocolMatch = !protocol || proxy.protocol === protocol;
-      const speedMatch = !speed || proxy.speed_category === speed;
+      const speedMatch = !speed || (proxy.speed_category || "").toLowerCase().trim() === speed.toLowerCase().trim();
+
       return ipMatch && countryMatch && protocolMatch && speedMatch;
     });
 
@@ -138,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
       allProxies = Array.isArray(data) ? data : [];
       populateCountries();
       setLastUpdated();
-      filterProxies(false);
+      filterProxies(false); 
     } catch (err) {
       console.error('Fetch error:', err);
       proxyList.innerHTML = `<tr><td colspan="7" class="error-message">Failed to load proxies.</td></tr>`;
@@ -151,11 +162,50 @@ document.addEventListener('DOMContentLoaded', () => {
     refreshTimer = setInterval(fetchProxies, REFRESH_MS);
   };
 
+  // Download Helpers
+  const getTimestamp = () => {
+    const d = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}`;
+  };
+
+  const downloadFile = (filename, content) => {
+    const blob = new Blob([content], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportTxt = () => {
+    const lines = filteredProxies.map(p => `${(p.protocol || "http").toLowerCase()}://${p.ip}`);
+    downloadFile(`proxies_${getTimestamp()}.txt`, lines.join("\n"));
+  };
+
+  const exportCsv = () => {
+    const header = "No,IP,Protocol,Country,Latency(ms),Status\n";
+    const rows = filteredProxies.map((p, i) => [
+      i + 1,
+      p.ip,
+      p.protocol,
+      p.country,
+      p.latency_ms,
+      p.status
+    ].join(","));
+    downloadFile(`proxies_${getTimestamp()}.csv`, header + rows.join("\n"));
+  };
+
   // Events
   countryFilter.onchange = () => filterProxies();
   protocolFilter.onchange = () => filterProxies();
   speedFilter.onchange = () => filterProxies();
+  showInactive.onchange = () => filterProxies();
   searchIP.oninput = debounce(() => filterProxies(), 200);
+
+  downloadTxtBtn.onclick = exportTxt;
+  downloadCsvBtn.onclick = exportCsv;
 
   tableHeaders.forEach(header => {
     header.onclick = () => {
@@ -182,6 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // Dark mode
   const applyInitialTheme = () => {
     if (localStorage.getItem('pgui_theme') === 'dark') {
       document.body.classList.add('dark-mode');
@@ -199,4 +250,3 @@ document.addEventListener('DOMContentLoaded', () => {
   fetchProxies();
   startAutoRefresh();
 });
- 
