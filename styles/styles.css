@@ -93,8 +93,8 @@ header {
   border-radius: 50%;
   display: inline-block;
 }
-.status-alive { background: #22c55e; }
-.status-dead { background: #ef4444; }
+.status-active { background: #22c55e; }
+.status-inactive { background: #ef4444; }
 
 .copy-btn {
   padding: 0.3rem 0.6rem;
@@ -124,11 +124,6 @@ header {
   font-size: 0.9rem;
   color: #555;
 }
-
-/* Latency colors */
-.latency-good { color: #22c55e; font-weight: 500; }     /* 0–300ms */
-.latency-medium { color: #eab308; font-weight: 500; }   /* 300–600ms */
-.latency-poor { color: #ef4444; font-weight: 500; }     /* 600ms+ */
 
 .dark-mode {
   background: #1f2937;
