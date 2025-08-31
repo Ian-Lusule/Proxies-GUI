@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   const PROXIES_URL = './assets/tested_proxies.json';
   const PAGE_SIZE = 20;
-  const REFRESH_MS = 30_000;
+  const REFRESH_MS = 150_000;
 
   const proxyList = document.getElementById('proxy-list');
   const countryFilter = document.getElementById('countryFilter');
