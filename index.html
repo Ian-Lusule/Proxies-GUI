@@ -15,7 +15,7 @@
     <div class="header-row">
       <div>
         <h1>Public Proxy List</h1>
-        <p>An interactive, automatically updated list of active proxies.</p>
+        <p>An interactive, automatically updated list of proxies.</p>
       </div>
       <button id="darkModeToggle" class="dark-toggle" title="Toggle dark mode">🌙 Dark Mode</button>
     </div>
@@ -25,46 +25,48 @@
     <section class="controls">
       <div class="filter-group">
         <label for="searchIP">Search IP</label>
-        <input type="text" id="searchIP" placeholder="e.g. 104.222 or 23.237.210.82"/>
-      </div>
-
-      <div class="filter-group">
-        <label for="countryFilter">Country</label>
-        <select id="countryFilter">
-          <option value="">All Countries</option>
-        </select>
+        <input type="text" id="searchIP" placeholder="e.g. 192.168 or 203.45"/>
       </div>
 
       <div class="filter-group">
         <label for="protocolFilter">Protocol</label>
         <select id="protocolFilter">
           <option value="">All Protocols</option>
-          <option value="HTTP">HTTP</option>
-          <option value="HTTPS">HTTPS</option>
-          <option value="SOCKS4">SOCKS4</option>
-          <option value="SOCKS5">SOCKS5</option>
-          <option value="CONNECT">CONNECT</option>
+          <option value="http">HTTP</option>
+          <option value="https">HTTPS</option>
+          <option value="socks4">SOCKS4</option>
+          <option value="socks5">SOCKS5</option>
         </select>
       </div>
 
       <div class="filter-group">
-        <label for="speedFilter">Speed</label>
-        <select id="speedFilter">
-          <option value="">All Speeds</option>
-          <option value="Excellent (0-100ms)">Excellent (0-100ms)</option>
-          <option value="Good (100-200ms)">Good (100-200ms)</option>
-          <option value="Medium (200-500ms)">Medium (200-500ms)</option>
-          <option value="Poor (500ms+)">Poor (500ms+)</option>
+        <label for="latencyFilter">Latency</label>
+        <select id="latencyFilter">
+          <option value="">All</option>
+          <option value="0-100">Excellent (0-100ms)</option>
+          <option value="100-300">Good (100-300ms)</option>
+          <option value="300-600">Medium (300-600ms)</option>
+          <option value="600+">Poor (600ms+)</option>
         </select>
       </div>
 
       <div class="filter-group">
-        <label><input type="checkbox" id="showInactive"/> Show Inactive</label>
+        <label for="anonymityFilter">Anonymity</label>
+        <select id="anonymityFilter">
+          <option value="">All</option>
+          <option value="elite">Elite</option>
+          <option value="anonymous">Anonymous</option>
+          <option value="transparent">Transparent</option>
+        </select>
       </div>
 
       <div class="filter-group">
-        <button id="downloadTxt">⬇ Download TXT</button>
-        <button id="downloadCsv">⬇ Download CSV</button>
+        <label><input type="checkbox" id="showDead"/> Show Dead</label>
+      </div>
+
+      <div class="filter-group">
+        <button id="downloadTxt">⬇ TXT</button>
+        <button id="downloadCsv">⬇ CSV</button>
       </div>
     </section>
 
@@ -75,16 +77,17 @@
         <thead>
           <tr>
             <th>No.</th>
-            <th data-sort="ip">IP:Port</th>
+            <th data-sort="ip">IP</th>
+            <th data-sort="port">Port</th>
             <th data-sort="protocol">Protocol</th>
-            <th data-sort="country">Country</th>
             <th data-sort="latency_ms" class="sort-asc">Latency (ms)</th>
+            <th data-sort="anonymity">Anonymity</th>
             <th>Status</th>
             <th>Copy</th>
           </tr>
         </thead>
         <tbody id="proxy-list">
-          <tr><td colspan="7" class="loading-message">Loading proxies...</td></tr>
+          <tr><td colspan="8" class="loading-message">Loading proxies...</td></tr>
         </tbody>
       </table>
 
