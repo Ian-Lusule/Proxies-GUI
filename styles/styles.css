@@ -1,25 +1,35 @@
+* {
+  box-sizing: border-box;
+}
+
 body {
   font-family: 'Roboto', sans-serif;
   margin: 0;
   background: #f9f9f9;
   color: #333;
   transition: background 0.3s, color 0.3s;
+  line-height: 1.6;
 }
 
 header {
   background: #3b82f6;
   color: white;
   padding: 1rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .header-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .container {
   padding: 1rem;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .controls {
@@ -27,19 +37,30 @@ header {
   flex-wrap: wrap;
   gap: 1rem;
   margin-bottom: 1rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .filter-group {
   display: flex;
   flex-direction: column;
   font-size: 0.9rem;
+  min-width: 150px;
+}
+
+.filter-group label {
+  font-weight: 500;
+  margin-bottom: 0.3rem;
 }
 
 .filter-group select,
-.filter-group input,
-.filter-group button {
-  padding: 0.4rem;
+.filter-group input[type="text"] {
+  padding: 0.5rem;
   font-size: 0.9rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
 }
 
 .filter-group button {
@@ -49,14 +70,44 @@ header {
   color: white;
   border-radius: 4px;
   transition: background 0.2s;
+  padding: 0.5rem 0.8rem;
+  font-weight: 500;
 }
 
 .filter-group button:hover {
   background: #2563eb;
 }
 
+.filter-group input[type="checkbox"] {
+  margin-right: 0.5rem;
+}
+
 .proxy-table-container {
   overflow-x: auto;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  position: relative;
+  min-height: 200px;
+}
+
+.loading-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  z-index: 10;
+}
+
+@keyframes spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
 .proxy-table {
@@ -65,13 +116,25 @@ header {
 }
 
 .proxy-table th, .proxy-table td {
-  padding: 0.6rem;
+  padding: 0.8rem;
   border-bottom: 1px solid #ddd;
   text-align: left;
 }
 
+.proxy-table th {
+  background: #f8f9fa;
+  font-weight: 500;
+  position: sticky;
+  top: 0;
+}
+
 .proxy-table th[data-sort] {
   cursor: pointer;
+  user-select: none;
+}
+
+.proxy-table th[data-sort]:hover {
+  background: #e9ecef;
 }
 
 .proxy-table th.sort-asc::after {
@@ -84,7 +147,7 @@ header {
 .status-cell {
   display: flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.5rem;
 }
 
 .status-dot {
@@ -97,13 +160,14 @@ header {
 .status-inactive { background: #ef4444; }
 
 .copy-btn {
-  padding: 0.3rem 0.6rem;
+  padding: 0.4rem 0.8rem;
   font-size: 0.8rem;
   background: #10b981;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  transition: background 0.2s;
 }
 .copy-btn:hover {
   background: #059669;
@@ -114,15 +178,41 @@ header {
   display: flex;
   gap: 1rem;
   align-items: center;
+  justify-content: center;
+  padding: 1rem;
 }
 .pagination button {
-  padding: 0.3rem 0.6rem;
+  padding: 0.5rem 1rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.pagination button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.page-indicator {
+  font-weight: 500;
 }
 
 .last-updated {
   margin-top: 1rem;
   font-size: 0.9rem;
   color: #555;
+  text-align: center;
+}
+
+.loading-message, .no-results-message, .error-message {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}
+
+.error-message {
+  color: #ef4444;
 }
 
 .dark-mode {
@@ -136,6 +226,53 @@ header {
 .dark-mode .proxy-table td {
   border-color: #374151;
 }
+.dark-mode .proxy-table th {
+  background: #111827;
+  color: #e5e7eb;
+}
 .dark-mode .filter-group button {
   background: #2563eb;
+}
+.dark-mode .controls,
+.dark-mode .proxy-table-container {
+  background: #374151;
+}
+.dark-mode .filter-group select,
+.dark-mode .filter-group input[type="text"] {
+  background: #4b5563;
+  color: #e5e7eb;
+  border-color: #6b7280;
+}
+.dark-mode .copy-btn {
+  background: #059669;
+}
+.dark-mode .pagination button {
+  background: #2563eb;
+}
+.dark-mode .pagination button:disabled {
+  background: #4b5563;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .header-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .controls {
+    flex-direction: column;
+  }
+  
+  .filter-group {
+    width: 100%;
+  }
+  
+  .proxy-table {
+    font-size: 0.85rem;
+  }
+  
+  .proxy-table th, .proxy-table td {
+    padding: 0.5rem;
+  }
 }
