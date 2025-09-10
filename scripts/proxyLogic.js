@@ -47,6 +47,14 @@ document.addEventListener('DOMContentLoaded', () => {
            va > vb ? (sortDirection === 'asc' ? 1 : -1) : 0;
   });
 
+  const getSpeedCategory = (latency) => {
+    if (latency <= 100) return "Excellent (0-100ms)";
+    if (latency <= 200) return "Good (100-200ms)";
+    if (latency <= 500) return "Medium (200-500ms)";
+    if (latency <= 1000) return "Poor (500-1000ms)";
+    return "Unusable (1000ms+)";
+  };
+
   const renderProxies = () => {
     proxyList.innerHTML = '';
     if (!filteredProxies.length) {
@@ -63,13 +71,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     pageItems.forEach((proxy, i) => {
       const globalIndex = start + i + 1;
+      const latency = Number(proxy.latency_ms) || 0;
       const row = document.createElement('tr');
       row.innerHTML = `
         <td>${globalIndex}</td>
         <td>${proxy.ip}</td>
         <td>${proxy.protocol}</td>
         <td>${proxy.country}</td>
-        <td>${Number(proxy.latency_ms) || 0} ms</td>
+        <td>${latency.toFixed(2)} ms</td>
         <td class="status-cell">
           <span class="status-dot status-${(proxy.status || '').toLowerCase()}"></span>
           ${proxy.status}
@@ -84,6 +93,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const renderPagination = (totalPages) => {
     paginationEl.innerHTML = '';
+    if (totalPages <= 1) return;
+    
     const prevBtn = document.createElement('button');
     prevBtn.textContent = 'Prev';
     prevBtn.disabled = currentPage <= 1;
@@ -128,19 +139,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const countryMatch = !country || proxy.country === country;
       const protocolMatch = !protocol || proxy.protocol === protocol;
       
-      // Handle speed filtering with both predefined and calculated categories
+      // Handle speed filtering
       const latency = Number(proxy.latency_ms) || 0;
       let proxySpeedCategory = proxy.speed_category;
       
-      // If speed_category doesn't exist, calculate it
+      // If the proxy doesn't have a speed_category, calculate it
       if (!proxySpeedCategory) {
-        if (latency <= 100) proxySpeedCategory = "Excellent (0-100ms)";
-        else if (latency <= 200) proxySpeedCategory = "Good (100-200ms)";
-        else if (latency <= 500) proxySpeedCategory = "Medium (200-500ms)";
-        else if (latency <= 1000) proxySpeedCategory = "Poor (500-1000ms)";
-        else proxySpeedCategory = "Unusable (1000ms+)";
+        proxySpeedCategory = getSpeedCategory(latency);
       }
       
+      // For speed filtering, we need to check both the stored category and the calculated one
       const speedMatch = !speed || proxySpeedCategory === speed;
 
       return ipMatch && countryMatch && protocolMatch && speedMatch;
@@ -161,12 +169,21 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       allProxies = Array.isArray(data) ? data : [];
+      
+      // Add speed_category if not present
+      allProxies.forEach(proxy => {
+        if (!proxy.speed_category) {
+          const latency = Number(proxy.latency_ms) || 0;
+          proxy.speed_category = getSpeedCategory(latency);
+        }
+      });
+      
       populateCountries();
       setLastUpdated();
       filterProxies(false); 
     } catch (err) {
       console.error('Fetch error:', err);
-      proxyList.innerHTML = `<tr><td colspan="7" class="error-message">Failed to load proxies.</td></tr>`;
+      proxyList.innerHTML = `<tr><td colspan="7" class="error-message">Failed to load proxies. Check if the JSON file exists at ${PROXIES_URL}</td></tr>`;
       paginationEl.innerHTML = '';
     } finally { showSpinner(false); }
   };
@@ -199,14 +216,15 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const exportCsv = () => {
-    const header = "No,IP,Protocol,Country,Latency(ms),Status\n";
+    const header = "No,IP,Protocol,Country,Latency(ms),Status,Speed Category\n";
     const rows = filteredProxies.map((p, i) => [
       i + 1,
       p.ip,
       p.protocol,
       p.country,
-      p.latency_ms,
-      p.status
+      Number(p.latency_ms) || 0,
+      p.status,
+      p.speed_category || getSpeedCategory(Number(p.latency_ms) || 0)
     ].join(","));
     downloadFile(`proxies_${getTimestamp()}.csv`, header + rows.join("\n"));
   };
